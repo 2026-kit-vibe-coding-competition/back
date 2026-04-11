@@ -1,8 +1,9 @@
 package hackerton.educationentity.system.jwt;
 
 import hackerton.educationentity.domain.user.entity.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,12 @@ public class JwtProvider {
     private final long accessTokenExpiration;
 
     public JwtProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expire-time}") long accessTokenExpiration
+            @Value("${jwt.secret:${spring.jwt.secret:}}") String secret,
+            @Value("${jwt.expire-time:${spring.jwt.expire-time.access:3600000}}") long accessTokenExpiration
     ) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret is required");
+        }
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpiration = accessTokenExpiration;
     }
@@ -29,12 +33,38 @@ public class JwtProvider {
         Date expiredAt = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
-                .setSubject(String.valueOf(user.getId()))
+                .subject(String.valueOf(user.getId()))
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole().name())
-                .setIssuedAt(now)
-                .setExpiration(expiredAt)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .issuedAt(now)
+                .expiration(expiredAt)
+                .signWith(secretKey)
                 .compact();
+    }
+
+    public boolean isValidToken(String token) {
+        try {
+            parseClaims(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public Long getUserId(String token) {
+        return Long.parseLong(parseClaims(token).getSubject());
+    }
+
+    public String getUserRole(String token) {
+        Object role = parseClaims(token).get("role");
+        return role == null ? null : role.toString();
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

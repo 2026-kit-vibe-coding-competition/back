@@ -14,31 +14,31 @@ public class UserDto {
     @Getter
     @NoArgsConstructor
     public static class SignUpDtoRequest {
-        @NotNull(message = "필수입니다.")
+        @NotNull(message = "required")
         private UserRole role;
 
-        @NotBlank(message = "필수입니다.")
+        @NotBlank(message = "required")
         private String name;
 
-        @Email(message = "메일 형식이 올바르지 않습니다.")
-        @NotBlank(message = "필수입니다.")
+        @Email(message = "invalid email format")
+        @NotBlank(message = "required")
         private String email;
 
-        @NotBlank(message = "필수입니다.")
+        @NotBlank(message = "required")
         private String password;
 
-        @NotNull(message = "필수입니다.")
-        private Long schoolId; // 어느 학교 소속인지
+        @NotNull(message = "required")
+        private Long schoolId;
     }
 
     @Getter
     @NoArgsConstructor
     public static class LoginRequest {
-        @Email(message = "메일 형식이 올바르지 않습니다.")
-        @NotBlank(message = "필수입니다.")
+        @Email(message = "invalid email format")
+        @NotBlank(message = "required")
         private String email;
 
-        @NotBlank(message = "필수입니다.")
+        @NotBlank(message = "required")
         private String password;
     }
 
@@ -59,4 +59,3 @@ public class UserDto {
         }
     }
 }
-

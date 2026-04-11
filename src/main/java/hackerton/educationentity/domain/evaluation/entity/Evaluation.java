@@ -15,7 +15,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Entity
 @SuperBuilder
-@Table(name = "evaluation")
+@Table(
+        name = "evaluation",
+        uniqueConstraints = @UniqueConstraint(name = "uk_evaluation_session_student", columnNames = {"session_id", "student_id"})
+)
 public class Evaluation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "evaluation_id", nullable = false)

@@ -33,4 +33,7 @@ public class Assignment {
     @Column(name = "assignment_form_ref", nullable = false)
     private String formRef;
 
+    @Column(name = "assignment_optional", nullable = false)
+    private boolean optional;
+
 }
