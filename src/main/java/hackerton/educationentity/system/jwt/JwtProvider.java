@@ -18,8 +18,8 @@ public class JwtProvider {
     private final long accessTokenExpiration;
 
     public JwtProvider(
-            @Value("${jwt.secret:${spring.jwt.secret:}}") String secret,
-            @Value("${jwt.expire-time:${spring.jwt.expire-time.access:3600000}}") long accessTokenExpiration
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expire-time}") long accessTokenExpiration
     ) {
         if (secret == null || secret.isBlank()) {
             throw new IllegalStateException("JWT secret is required");
