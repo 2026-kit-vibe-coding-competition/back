@@ -2,12 +2,15 @@ package hackerton.educationentity.domain.evaluation.entity;
 
 import hackerton.educationentity.domain.session.entity.Session;
 import hackerton.educationentity.domain.student.entity.Student;
+import hackerton.educationentity.domain.evaluation.type.EvaluationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,5 +40,12 @@ public class Evaluation {
 
     @Column(name = "evaluation_memo", nullable = false)
     private String memo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "evaluation_status", nullable = false)
+    private EvaluationStatus status;
+
+    @Column(name = "analyzing_expire_time")
+    private LocalDateTime analyzingExpireTime;
 
 }

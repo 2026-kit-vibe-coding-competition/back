@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/feedback-reports")
+@RequestMapping("/api/v1/feedback-reports")
 public class FeedbackReportController {
     private final FeedbackReportService feedbackReportService;
 
@@ -24,3 +24,4 @@ public class FeedbackReportController {
         return feedbackReportService.getFeedbackReport(id);
     }
 }
+

@@ -20,8 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
             select u from User u
             where (:schoolId is null or u.school.id = :schoolId)
               and (:role is null or u.role = :role)
-              and (:name is null or lower(u.name) like lower(concat('%', :name, '%')))
-              and (:email is null or lower(u.email) like lower(concat('%', :email, '%')))
+              and (:name is null or lower(u.name) like lower(concat('%', cast(:name as string), '%')))
+              and (:email is null or lower(u.email) like lower(concat('%', cast(:email as string), '%')))
             """)
     List<User> search(@Param("schoolId") Long schoolId,
                       @Param("role") UserRole role,

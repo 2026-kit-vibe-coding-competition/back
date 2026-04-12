@@ -14,11 +14,13 @@ public interface RelationRepository extends JpaRepository<Relation, Long> {
             select r from Relation r
             where (:parentId is null or r.parent.id = :parentId)
               and (:studentId is null or r.student.id = :studentId)
-              and (:relation is null or lower(r.relation) like lower(concat('%', :relation, '%')))
+              and (:relation is null or lower(r.relation) like lower(concat('%', cast(:relation as string), '%')))
             """)
     List<Relation> search(@Param("parentId") Long parentId,
                           @Param("studentId") Long studentId,
                           @Param("relation") String relation);
+
+    List<Relation> findByParentId(Long parentId);
 
     boolean existsByParentIdAndStudentId(Long parentId, Long studentId);
 

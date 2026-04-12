@@ -14,7 +14,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             select s from Student s
             where (:classroomId is null or s.classroom.id = :classroomId)
               and (:status is null or s.status = :status)
-              and (:name is null or lower(s.name) like lower(concat('%', :name, '%')))
+              and (:name is null or lower(s.name) like lower(concat('%', cast(:name as string), '%')))
             """)
     List<Student> search(@Param("classroomId") Long classroomId,
                          @Param("name") String name,

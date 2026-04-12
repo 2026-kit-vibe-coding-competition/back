@@ -14,7 +14,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
             select s from Session s
             where (:subjectId is null or s.subject.id = :subjectId)
               and (:date is null or s.date = :date)
-              and (:title is null or lower(s.title) like lower(concat('%', :title, '%')))
+              and (:title is null or lower(s.title) like lower(concat('%', cast(:title as string), '%')))
             """)
     List<Session> search(@Param("subjectId") Long subjectId,
                          @Param("title") String title,
