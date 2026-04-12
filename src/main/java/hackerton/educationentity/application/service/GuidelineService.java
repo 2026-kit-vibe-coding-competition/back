@@ -4,6 +4,8 @@ import hackerton.educationentity.application.dto.request.ApproveGuidelineRequest
 import hackerton.educationentity.application.dto.request.ReviewGuidelineRequest;
 import hackerton.educationentity.application.dto.request.ShareGuidelineRequest;
 import hackerton.educationentity.application.dto.response.GuidelineResponse;
+import hackerton.educationentity.domain.feedback_report.entity.FeedbackReport;
+import hackerton.educationentity.domain.feedback_report.repository.FeedbackReportRepository;
 import hackerton.educationentity.domain.guideline.entity.Guideline;
 import hackerton.educationentity.domain.guideline.repository.GuidelineRepository;
 import hackerton.educationentity.domain.guideline.type.GuidelineAudience;
@@ -21,6 +23,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class GuidelineService {
     private final GuidelineRepository guidelineRepository;
+    private final FeedbackReportRepository feedbackReportRepository;
 
     public GuidelineResponse getGuideline(Long id) {
         return toResponse(getGuidelineEntity(id));
@@ -38,17 +41,22 @@ public class GuidelineService {
         if (guideline.getStatus() == GuidelineStatus.SHARED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Shared guideline cannot be moved back to review");
         }
-        guideline.setTeacherReviewNote(request.teacherReviewNote());
+        if (request != null && request.teacherReviewNote() != null) {
+            guideline.setTeacherReviewNote(request.teacherReviewNote());
+        }
+        guideline.setStatus(GuidelineStatus.REVIEWED);
         return toResponse(guideline);
     }
 
     @Transactional
     public GuidelineResponse approveGuideline(Long id, ApproveGuidelineRequest request) {
         Guideline guideline = getGuidelineEntity(id);
-        if (guideline.getStatus() != GuidelineStatus.DRAFT) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only draft guideline can be approved");
+        if (guideline.getStatus() != GuidelineStatus.REVIEWED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only reviewed guideline can be approved");
         }
-        guideline.setTeacherReviewNote(request.teacherReviewNote());
+        if (request != null && request.teacherReviewNote() != null) {
+            guideline.setTeacherReviewNote(request.teacherReviewNote());
+        }
         guideline.setStatus(GuidelineStatus.APPROVED);
         return toResponse(guideline);
     }
@@ -59,15 +67,23 @@ public class GuidelineService {
         if (guideline.getStatus() != GuidelineStatus.APPROVED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Only approved guideline can be shared");
         }
-        if (request.audience() == null || request.audience() == GuidelineAudience.TEACHER) {
+        GuidelineAudience audience = resolveShareAudience(request);
+        if (audience == GuidelineAudience.TEACHER) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Share audience must be PARENT or SHARED");
         }
-        if (request.teacherReviewNote() != null) {
+        if (request != null && request.teacherReviewNote() != null) {
             guideline.setTeacherReviewNote(request.teacherReviewNote());
         }
-        guideline.setAudience(request.audience());
+        guideline.setAudience(audience);
         guideline.setStatus(GuidelineStatus.SHARED);
         return toResponse(guideline);
+    }
+
+    private GuidelineAudience resolveShareAudience(ShareGuidelineRequest request) {
+        if (request == null || request.audience() == null) {
+            return GuidelineAudience.SHARED;
+        }
+        return request.audience();
     }
 
     private Guideline getGuidelineEntity(Long id) {
@@ -76,6 +92,10 @@ public class GuidelineService {
     }
 
     private GuidelineResponse toResponse(Guideline guideline) {
+        Long feedbackReportId = feedbackReportRepository.findByAiRequestId(guideline.getAiRequest().getId())
+                .map(FeedbackReport::getId)
+                .orElse(null);
+
         return new GuidelineResponse(
                 guideline.getId(),
                 guideline.getAiRequest().getId(),
@@ -91,7 +111,10 @@ public class GuidelineService {
                 guideline.getNextCheck(),
                 guideline.getAudience(),
                 guideline.getStatus(),
-                guideline.getTeacherReviewNote()
+                guideline.getTeacherReviewNote(),
+                feedbackReportId,
+                guideline.getCreatedAt(),
+                guideline.getUpdatedAt()
         );
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/relations")
+@RequestMapping("/api/v1/relations")
 public class RelationController {
     private final RelationService relationService;
 
@@ -45,3 +45,4 @@ public class RelationController {
         relationService.deleteRelation(id);
     }
 }
+

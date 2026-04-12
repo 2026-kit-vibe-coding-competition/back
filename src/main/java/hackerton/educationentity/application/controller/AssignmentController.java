@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/assignments")
+@RequestMapping("/api/v1/assignments")
 public class AssignmentController {
     private final AssignmentService assignmentService;
 
@@ -44,3 +44,4 @@ public class AssignmentController {
         assignmentService.deleteAssignment(id);
     }
 }
+

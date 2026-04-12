@@ -7,6 +7,7 @@ import hackerton.educationentity.application.dto.response.AssignmentResponse;
 import hackerton.educationentity.application.dto.response.EvaluationResponse;
 import hackerton.educationentity.domain.assignment.repository.AssignmentRepository;
 import hackerton.educationentity.domain.evaluation.repository.EvaluationRepository;
+import hackerton.educationentity.domain.evaluation.type.EvaluationStatus;
 import hackerton.educationentity.domain.session.entity.Session;
 import hackerton.educationentity.domain.session.repository.SessionRepository;
 import hackerton.educationentity.domain.subject.entity.Subject;
@@ -54,13 +55,15 @@ public class SessionService {
 
     public List<EvaluationResponse> getSessionEvaluations(Long id) {
         getSessionEntity(id);
-        return evaluationRepository.findBySessionId(id).stream()
+        return evaluationRepository.findBySessionIdAndStatusNot(id, EvaluationStatus.DELETED).stream()
                 .map(evaluation -> new EvaluationResponse(
                         evaluation.getId(),
                         evaluation.getSession().getId(),
                         evaluation.getStudent().getId(),
                         evaluation.getDataRef(),
-                        evaluation.getMemo()
+                        evaluation.getMemo(),
+                        evaluation.getStatus(),
+                        evaluation.getAnalyzingExpireTime()
                 ))
                 .toList();
     }

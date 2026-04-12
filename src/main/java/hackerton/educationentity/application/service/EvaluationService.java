@@ -1,10 +1,12 @@
 package hackerton.educationentity.application.service;
 
 import hackerton.educationentity.application.dto.request.CreateEvaluationRequest;
+import hackerton.educationentity.application.dto.request.UpdateEvaluationStatusRequest;
 import hackerton.educationentity.application.dto.request.UpdateEvaluationRequest;
 import hackerton.educationentity.application.dto.response.EvaluationResponse;
 import hackerton.educationentity.domain.evaluation.entity.Evaluation;
 import hackerton.educationentity.domain.evaluation.repository.EvaluationRepository;
+import hackerton.educationentity.domain.evaluation.type.EvaluationStatus;
 import hackerton.educationentity.domain.session.entity.Session;
 import hackerton.educationentity.domain.session.repository.SessionRepository;
 import hackerton.educationentity.domain.student.entity.Student;
@@ -24,9 +26,10 @@ public class EvaluationService {
     private final EvaluationRepository evaluationRepository;
     private final SessionRepository sessionRepository;
     private final StudentRepository studentRepository;
+    private final EvaluationStatusService evaluationStatusService;
 
     public List<EvaluationResponse> getEvaluations(Long sessionId, Long studentId) {
-        return evaluationRepository.search(sessionId, studentId).stream()
+        return evaluationRepository.search(sessionId, studentId, EvaluationStatus.DELETED).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -41,9 +44,11 @@ public class EvaluationService {
         Student student = getStudent(request.studentId());
 
         validateEvaluationIntegrity(session, student);
-        if (evaluationRepository.existsBySessionIdAndStudentId(session.getId(), student.getId())) {
+        if (evaluationRepository.existsBySessionIdAndStudentIdAndStatusNot(session.getId(), student.getId(), EvaluationStatus.DELETED)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Evaluation already exists for this session and student");
         }
+
+        EvaluationStatus initialStatus = evaluationStatusService.resolveStatus(request.status());
 
         Evaluation evaluation = Evaluation.builder()
                 .session(session)
@@ -51,6 +56,7 @@ public class EvaluationService {
                 .dataRef(request.dataRef())
                 .memo(request.memo())
                 .build();
+        evaluationStatusService.applyStatus(evaluation, initialStatus, request.analyzingExpireTime());
 
         return toResponse(evaluationRepository.save(evaluation));
     }
@@ -62,7 +68,7 @@ public class EvaluationService {
         Student student = getStudent(request.studentId());
 
         validateEvaluationIntegrity(session, student);
-        if (evaluationRepository.existsBySessionIdAndStudentIdAndIdNot(session.getId(), student.getId(), id)) {
+        if (evaluationRepository.existsBySessionIdAndStudentIdAndIdNotAndStatusNot(session.getId(), student.getId(), id, EvaluationStatus.DELETED)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Evaluation already exists for this session and student");
         }
 
@@ -70,6 +76,10 @@ public class EvaluationService {
         evaluation.setStudent(student);
         evaluation.setDataRef(request.dataRef());
         evaluation.setMemo(request.memo());
+        if (request.status() != null || request.analyzingExpireTime() != null) {
+            EvaluationStatus nextStatus = request.status() != null ? request.status() : evaluation.getStatus();
+            evaluationStatusService.applyStatus(evaluation, nextStatus, request.analyzingExpireTime());
+        }
 
         return toResponse(evaluation);
     }
@@ -77,11 +87,22 @@ public class EvaluationService {
     @Transactional
     public void deleteEvaluation(Long id) {
         Evaluation evaluation = getEvaluationEntity(id);
-        evaluationRepository.delete(evaluation);
+        evaluationStatusService.applyStatus(evaluation, EvaluationStatus.DELETED, null);
+    }
+
+    @Transactional
+    public EvaluationResponse updateEvaluationStatus(Long id, UpdateEvaluationStatusRequest request) {
+        if (request.status() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Evaluation status is required");
+        }
+
+        Evaluation evaluation = getEvaluationEntity(id);
+        evaluationStatusService.applyStatus(evaluation, request.status(), request.analyzingExpireTime());
+        return toResponse(evaluation);
     }
 
     private Evaluation getEvaluationEntity(Long id) {
-        return evaluationRepository.findById(id)
+        return evaluationRepository.findByIdAndStatusNot(id, EvaluationStatus.DELETED)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Evaluation not found"));
     }
 
@@ -110,7 +131,9 @@ public class EvaluationService {
                 evaluation.getSession().getId(),
                 evaluation.getStudent().getId(),
                 evaluation.getDataRef(),
-                evaluation.getMemo()
+                evaluation.getMemo(),
+                evaluation.getStatus(),
+                evaluation.getAnalyzingExpireTime()
         );
     }
 }

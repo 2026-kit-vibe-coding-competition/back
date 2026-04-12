@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/ai-requests")
+@RequestMapping("/api/v1/ai-requests")
 public class AiRequestController {
     private final AiRequestService aiRequestService;
 
@@ -24,3 +24,4 @@ public class AiRequestController {
         return aiRequestService.getAiRequest(id);
     }
 }
+

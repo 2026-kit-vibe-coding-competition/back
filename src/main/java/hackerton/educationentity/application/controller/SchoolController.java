@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/schools")
+@RequestMapping("/api/v1/schools")
 public class SchoolController {
     private final SchoolService schoolService;
 
@@ -44,3 +44,4 @@ public class SchoolController {
         schoolService.deleteSchool(id);
     }
 }
+

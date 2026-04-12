@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 public class UserManagementController {
     private final UserManagementService userManagementService;
 
@@ -47,3 +47,4 @@ public class UserManagementController {
         userManagementService.deleteUser(id);
     }
 }
+

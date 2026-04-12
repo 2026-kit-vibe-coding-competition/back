@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sessions")
+@RequestMapping("/api/v1/sessions")
 public class SessionController {
     private final SessionService sessionService;
 
@@ -57,3 +57,4 @@ public class SessionController {
         sessionService.deleteSession(id);
     }
 }
+

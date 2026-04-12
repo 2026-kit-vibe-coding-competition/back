@@ -3,6 +3,8 @@ package hackerton.educationentity.application.service;
 import hackerton.educationentity.application.dto.response.FeedbackReportResponse;
 import hackerton.educationentity.domain.feedback_report.entity.FeedbackReport;
 import hackerton.educationentity.domain.feedback_report.repository.FeedbackReportRepository;
+import hackerton.educationentity.domain.guideline.entity.Guideline;
+import hackerton.educationentity.domain.guideline.repository.GuidelineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class FeedbackReportService {
     private final FeedbackReportRepository feedbackReportRepository;
+    private final GuidelineRepository guidelineRepository;
 
     public List<FeedbackReportResponse> getFeedbackReports(Long sessionId, Long studentId) {
         return feedbackReportRepository.search(sessionId, studentId).stream()
@@ -31,9 +34,12 @@ public class FeedbackReportService {
     }
 
     private FeedbackReportResponse toResponse(FeedbackReport report) {
+        Guideline guideline = guidelineRepository.findByAiRequestId(report.getAiRequest().getId()).orElse(null);
+
         return new FeedbackReportResponse(
                 report.getId(),
                 report.getAiRequest().getId(),
+                guideline != null ? guideline.getId() : null,
                 report.getSession().getId(),
                 report.getStudent().getId(),
                 report.getStudentName(),
@@ -44,7 +50,17 @@ public class FeedbackReportService {
                 report.getWeaknessTags(),
                 report.getTeacherMemo(),
                 report.getOcrSummary(),
-                report.getTrend()
+                report.getTrend(),
+                guideline != null ? guideline.getSummary() : null,
+                guideline != null ? guideline.getStrength() : null,
+                guideline != null ? guideline.getImprovement() : null,
+                guideline != null ? guideline.getNextStep() : null,
+                guideline != null ? guideline.getSchoolAction() : null,
+                guideline != null ? guideline.getHomeAction() : null,
+                guideline != null ? guideline.getNextCheck() : null,
+                guideline != null ? guideline.getStatus() : null,
+                report.getCreatedAt(),
+                report.getUpdatedAt()
         );
     }
 }
