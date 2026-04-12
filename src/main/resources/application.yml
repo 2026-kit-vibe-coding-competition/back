@@ -29,11 +29,12 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
 
 jwt:
   secret: ${JWT_SECRET}
   expire-time: ${JWT_ACCESS_TOKEN_EXPIRATION_MS}
 
-cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4173,http://127.0.0.1:4173}
+app:
+  ai:
+    ocr-model: ${AI_OLLAMA_OCR_MODEL}
