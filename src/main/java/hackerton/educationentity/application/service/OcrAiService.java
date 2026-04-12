@@ -76,7 +76,6 @@ public class OcrAiService {
         if (responseBody == null || responseBody.isBlank()) {
             throw new IllegalStateException("OCR 응답이 비어 있습니다.");
         }
-
         return responseBody;
     }
 
