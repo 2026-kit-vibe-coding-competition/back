@@ -1,6 +1,7 @@
 package hackerton.educationentity.application.controller;
 
 import hackerton.educationentity.application.dto.request.CreateEvaluationRequest;
+import hackerton.educationentity.application.dto.request.UpdateEvaluationStatusRequest;
 import hackerton.educationentity.application.dto.request.UpdateEvaluationRequest;
 import hackerton.educationentity.application.dto.response.EvaluationResponse;
 import hackerton.educationentity.application.service.EvaluationService;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/evaluations")
+@RequestMapping("/api/v1/evaluations")
 public class EvaluationController {
     private final EvaluationService evaluationService;
 
@@ -38,9 +39,15 @@ public class EvaluationController {
         return evaluationService.updateEvaluation(id, request);
     }
 
+    @PatchMapping("/{id}/status")
+    public EvaluationResponse updateEvaluationStatus(@PathVariable Long id, @RequestBody UpdateEvaluationStatusRequest request) {
+        return evaluationService.updateEvaluationStatus(id, request);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEvaluation(@PathVariable Long id) {
         evaluationService.deleteEvaluation(id);
     }
 }
+

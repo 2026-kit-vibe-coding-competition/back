@@ -5,6 +5,7 @@ import hackerton.educationentity.application.dto.request.UpdateStudentRequest;
 import hackerton.educationentity.application.dto.response.StudentResponse;
 import hackerton.educationentity.application.dto.response.EvaluationResponse;
 import hackerton.educationentity.domain.evaluation.repository.EvaluationRepository;
+import hackerton.educationentity.domain.evaluation.type.EvaluationStatus;
 import hackerton.educationentity.domain.classroom.entity.Classroom;
 import hackerton.educationentity.domain.classroom.repository.ClassroomRepository;
 import hackerton.educationentity.domain.student.entity.Student;
@@ -37,13 +38,15 @@ public class StudentService {
 
     public List<EvaluationResponse> getStudentEvaluations(Long id) {
         getStudentEntity(id);
-        return evaluationRepository.findByStudentId(id).stream()
+        return evaluationRepository.findByStudentIdAndStatusNot(id, EvaluationStatus.DELETED).stream()
                 .map(evaluation -> new EvaluationResponse(
                         evaluation.getId(),
                         evaluation.getSession().getId(),
                         evaluation.getStudent().getId(),
                         evaluation.getDataRef(),
-                        evaluation.getMemo()
+                        evaluation.getMemo(),
+                        evaluation.getStatus(),
+                        evaluation.getAnalyzingExpireTime()
                 ))
                 .toList();
     }

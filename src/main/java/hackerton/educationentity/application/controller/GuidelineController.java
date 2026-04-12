@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/guidelines")
+@RequestMapping("/api/v1/guidelines")
 public class GuidelineController {
     private final GuidelineService guidelineService;
 
@@ -28,17 +28,18 @@ public class GuidelineController {
     }
 
     @PostMapping("/{id}/review")
-    public GuidelineResponse reviewGuideline(@PathVariable Long id, @RequestBody ReviewGuidelineRequest request) {
+    public GuidelineResponse reviewGuideline(@PathVariable Long id, @RequestBody(required = false) ReviewGuidelineRequest request) {
         return guidelineService.reviewGuideline(id, request);
     }
 
     @PostMapping("/{id}/approve")
-    public GuidelineResponse approveGuideline(@PathVariable Long id, @RequestBody ApproveGuidelineRequest request) {
+    public GuidelineResponse approveGuideline(@PathVariable Long id, @RequestBody(required = false) ApproveGuidelineRequest request) {
         return guidelineService.approveGuideline(id, request);
     }
 
     @PostMapping("/{id}/share")
-    public GuidelineResponse shareGuideline(@PathVariable Long id, @RequestBody ShareGuidelineRequest request) {
+    public GuidelineResponse shareGuideline(@PathVariable Long id, @RequestBody(required = false) ShareGuidelineRequest request) {
         return guidelineService.shareGuideline(id, request);
     }
 }
+

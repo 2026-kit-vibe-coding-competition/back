@@ -13,7 +13,7 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     @Query("""
             select a from Assignment a
             where (:sessionId is null or a.session.id = :sessionId)
-              and (:title is null or lower(a.title) like lower(concat('%', :title, '%')))
+              and (:title is null or lower(a.title) like lower(concat('%', cast(:title as string), '%')))
             """)
     List<Assignment> search(@Param("sessionId") Long sessionId,
                             @Param("title") String title);

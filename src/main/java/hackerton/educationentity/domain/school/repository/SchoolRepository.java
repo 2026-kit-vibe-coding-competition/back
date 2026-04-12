@@ -12,7 +12,7 @@ import java.util.List;
 public interface SchoolRepository extends JpaRepository<School, Long> {
     @Query("""
             select s from School s
-            where (:name is null or lower(s.name) like lower(concat('%', :name, '%')))
+            where (:name is null or lower(s.name) like lower(concat('%', cast(:name as string), '%')))
               and (:type is null or s.type = :type)
             """)
     List<School> search(@Param("name") String name,

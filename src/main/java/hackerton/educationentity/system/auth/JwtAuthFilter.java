@@ -16,8 +16,8 @@ import java.util.Set;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String ACCESS_TOKEN_COOKIE = "accessToken";
     private static final Set<String> PUBLIC_PATHS = Set.of(
-            "/api/users/signup",
-            "/api/users/login",
+            "/api/v1/users/signup",
+            "/api/v1/users/login",
             "/error",
             "/favicon.ico"
     );
@@ -77,3 +77,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.getWriter().write("{\"message\":\"Unauthorized\"}");
     }
 }
+
